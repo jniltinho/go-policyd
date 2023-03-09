@@ -41,12 +41,9 @@ Usual go commands, such as `go mod tidy`, `go build` should download dependencie
 
 Version tag is given from git tag , a simple makefile is :
 
-```Makefile
-NAME= $(notdir $(shell pwd))
-TAG=$(shell git tag)
-
-{NAME}:
-  go build -ldflags '-w -s -X main.Version=${NAME}-${TAG}' -o ${NAME}
+```bash
+go mod tidy
+make build
 ```
 
 ## How to use go-policyd step by step
