@@ -1,0 +1,23 @@
+[Unit]
+Description=Policyd Go daemon for Postfix
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/policyd/bin/policyd
+Restart=always
+
+#User=policyd
+#Group=policyd
+#WorkingDirectory=/opt/policyd
+#LimitNOFILE=100000
+#LimitNOFILESoft=100000
+
+[Install]
+WantedBy=multi-user.target
+
+# cp policyd.service /etc/systemd/system/
+# systemctl daemon-reload
+# systemctl enable policyd.service
+# systemctl start policyd.service
+# systemctl status policyd.service
