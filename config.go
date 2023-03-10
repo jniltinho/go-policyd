@@ -2,15 +2,27 @@ package main
 
 import (
 	"bufio"
-	"fmt"
+	"log"
+	"log/syslog"
 	"os"
 	"strings"
+	"sync"
 )
 
 var (
-	cfg         map[string]string
-	inblacklist map[string]bool
-	inwhitelist map[string]bool
+	cfg          map[string]string
+	inblacklist  map[string]bool
+	inwhitelist  map[string]bool
+	xlog         *syslog.Writer
+	xmutex       sync.Mutex
+	defaultQuota int64
+	config       string
+	Version      string
+)
+
+const (
+	syslogtag = "policyd"
+	cfgfile   = "/etc/postfix/" + syslogtag + ".cfg"
 )
 
 // InitCfg read cfgfile variable
@@ -21,7 +33,8 @@ func InitCfg(s string) {
 
 	f, err := os.Open(s)
 	if err != nil {
-		panic(fmt.Sprintf("Unable to read configuration file %s", s))
+		log.Printf("Unable to read configuration file %s", s)
+		os.Exit(1)
 	}
 	defer f.Close()
 	rd := bufio.NewReader(f)
