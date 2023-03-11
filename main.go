@@ -32,15 +32,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type connData struct {
-	saslUsername   string
-	clientAddress  string
-	sender         string
-	recipientCount string
-}
-
 func init() {
-	flag.StringVar(&config, "config", cfgfile, "Set Path Config File")
+	flag.StringVar(&config, "config", CFGFILE, "Set Path Config File")
+	flag.StringVar(&pidfile, "pidfile", PIDFILE, "Set PID File")
 }
 
 func main() {
@@ -71,7 +65,7 @@ func main() {
 	initSyslog(syslogtag)
 
 	xlog.Info(fmt.Sprintf("%s started.", Version))
-	writePidfile("/var/run/" + syslogtag + ".pid")
+	writePidfile(pidfile)
 
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s)/%s", cfg["dbuser"], cfg["dbpass"], cfg["dbhost"], cfg["dbname"])
 	db, err := sql.Open("mysql", connectionString)
@@ -88,6 +82,7 @@ func main() {
 		if err != nil {
 			log.Panic("Error accepting: " + err.Error())
 		}
+		xlog.Info("====> GO-POLICYD <=====")
 		go handleRequest(conn, db)
 	}
 }

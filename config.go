@@ -17,12 +17,15 @@ var (
 	xmutex       sync.Mutex
 	defaultQuota int64
 	config       string
+	pidfile      string
 	Version      string
 )
 
 const (
-	syslogtag = "policyd"
-	cfgfile   = "/opt/filter/" + syslogtag + ".cfg"
+	syslogtag = "postfix/go-policyd"
+	appname   = "policyd"
+	PIDFILE   = "/run/" + appname + ".pid"
+	CFGFILE   = "/opt/filter/" + appname + ".cfg"
 )
 
 // InitCfg read cfgfile variable

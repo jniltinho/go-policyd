@@ -1,6 +1,3 @@
-//go:build linux || freebsd
-// +build linux freebsd
-
 package main
 
 import (
@@ -17,7 +14,7 @@ import (
 
 func initSyslog(exe string) {
 	var e error
-	xlog, e = syslog.New(syslog.LOG_DAEMON|syslog.LOG_INFO, exe)
+	xlog, e = syslog.New(syslog.LOG_MAIL|syslog.LOG_INFO, exe)
 	if e == nil {
 		log.SetOutput(xlog)
 		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime)) // remove timestamp
@@ -35,10 +32,12 @@ func writePidfile(pidfile string) {
 // Handles incoming requests.
 func handleRequest(conn net.Conn, db *sql.DB) {
 	var xdata connData
+	var lines []string
 
 	reader := bufio.NewReader(conn)
 	for {
 		s, err := reader.ReadString('\n')
+		//xlog.Info(fmt.Sprintf("Read: %s", s))
 		if err != nil {
 			fmt.Println("Error reading:", err.Error())
 			break
@@ -54,17 +53,16 @@ func handleRequest(conn net.Conn, db *sql.DB) {
 			continue
 		}
 
+		lines = append(lines, s)
 		vv[0] = strings.Trim(vv[0], " \n\r")
 		vv[1] = strings.Trim(vv[1], " \n\r")
+		//xlog.Info(fmt.Sprintf("Key: %s, Value: %s", vv[0], vv[1]))
+
 		switch vv[0] {
 		case "sasl_username":
-			if strings.IndexByte(vv[1], '@') == -1 {
-				xdata.saslUsername = vv[1]
-			} else {
-				xdata.saslUsername = vv[1][:strings.IndexByte(vv[1], '@')]
-			}
+			xdata.SASLUsername = splitMail(vv[1])
 		case "sender":
-			xdata.sender = vv[1]
+			xdata.Sender = vv[1]
 		case "client_address":
 			xdata.clientAddress = vv[1]
 		case "recipient_count":
@@ -72,6 +70,12 @@ func handleRequest(conn net.Conn, db *sql.DB) {
 		}
 	}
 
+	if len(xdata.SASLUsername) == 0 {
+		//xdata.SASLUsername = xdata.Sender
+		xdata.SASLUsername = splitMail(xdata.Sender)
+	}
+
+	parseRequest(lines)
 	resp := policyVerify(xdata, db) // Here, where the magic happen
 
 	fmt.Fprintf(conn, "action=%s\n\n", resp)

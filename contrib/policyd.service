@@ -4,14 +4,20 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/opt/policyd/bin/policyd
-Restart=always
+PIDFile=/run/policyd.pid
+ExecStart=/opt/filter/go-policyd
+ExecReload=/bin/kill -HUP $MAINPID
 
-#User=policyd
-#Group=policyd
-#WorkingDirectory=/opt/policyd
+#User=vscan
+#Group=vscan
+WorkingDirectory=/opt/filter
 #LimitNOFILE=100000
 #LimitNOFILESoft=100000
+
+Restart=on-failure
+RestartSec=10
+StandardOutput=null
+StandardError=null
 
 [Install]
 WantedBy=multi-user.target
