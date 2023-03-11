@@ -49,9 +49,9 @@ make build
 ## How to use go-policyd step by step
 
 * Create mariadb database,
-* copy binary  in __/local/bin/policyd__,
-* Adapt config file contrib/policyd.cfg to  __/etc/postfix/policyd.cfg__,
-* Enable and start (CentOS systemd) service  __/local/etc/policyd.service__,
+* copy binary  in __/opt/filter/policyd__,
+* Adapt config file contrib/policyd.cfg to  __/opt/filter/policyd.cfg__,
+* Enable and start (CentOS systemd) service  __/etc/systemd/system/policyd.service__,
 * Configure postfix for policyd restrictions.
 
 ## Mariadb SQL database creation
@@ -89,14 +89,16 @@ __Nota__ :
 ## CentOS Systemd daemon setup
 
 ```Shell Session
-# mkdir -p /local/bin/
-# cp policyd /local/bin
-# cp contrib/unit.service /local/etc/policyd.service
-# cp contrib/policyd.cfg /etc/postfix/policyd.cfg
-# edit /etc/postfix/policyd.cfg
+# useradd -d /var/spool/filter -m vscan
+# mkdir /opt/filter
+# chown -R vscan:vscan /opt/filter 
+# cp policyd /opt/filter/policyd
+# cp contrib/policyd.service /etc/systemd/system/policyd.service
+# cp contrib/policyd.cfg /opt/filter/policyd.cfg
+# edit /opt/filter/policyd.cfg
 
 # systemctl daemon-reload
-# systemctl enable /local/etc/policyd.service
+# systemctl enable policyd.service
 # systemctl start policyd.service
 # systemctl status  policyd.service
 ```

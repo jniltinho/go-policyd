@@ -22,7 +22,7 @@ var (
 
 const (
 	syslogtag = "policyd"
-	cfgfile   = "/etc/postfix/" + syslogtag + ".cfg"
+	cfgfile   = "/opt/filter/" + syslogtag + ".cfg"
 )
 
 // InitCfg read cfgfile variable
