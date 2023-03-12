@@ -25,7 +25,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net"
 	"os"
 	"strconv"
 
@@ -54,13 +53,9 @@ func main() {
 	InitCfg(config)
 	defaultQuota, _ = strconv.ParseInt(cfg["defaultquota"], 0, 64)
 
-	// Listen for incoming connections.
-	l, err := net.Listen("tcp", cfg["bind"])
-	if err != nil {
-		log.Printf("Error listening: %s", err.Error())
-		os.Exit(1)
-	}
-	defer l.Close()
+	//listener := RunServer("tcp", cfg["bind"])
+	listener := UnixServer()
+	defer listener.Close()
 
 	initSyslog(syslogtag)
 
@@ -78,11 +73,12 @@ func main() {
 
 	for {
 		// Listen for an incoming connection.
-		conn, err := l.Accept()
+		conn, err := listener.Accept()
 		if err != nil {
 			log.Panic("Error accepting: " + err.Error())
 		}
 		xlog.Info("====> GO-POLICYD <=====")
 		go handleRequest(conn, db)
 	}
+
 }

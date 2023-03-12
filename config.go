@@ -29,6 +29,7 @@ const (
 	appname   = "policyd"
 	PIDFILE   = "/run/" + appname + ".pid"
 	CFGFILE   = "/opt/filter/" + appname + ".cfg"
+	SOCKADDR  = "/var/spool/postfix/private/go-policyd"
 )
 
 // InitCfg read cfgfile variable
