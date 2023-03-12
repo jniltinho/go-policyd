@@ -2,12 +2,15 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"log/syslog"
 	"os"
 	"strings"
 	"sync"
 )
+
+var F = fmt.Sprintf
 
 var (
 	cfg          map[string]string
