@@ -111,8 +111,8 @@ Edit `/etc/postfix/main.cf` to add :
 
 ```shell
 # Policyd restrictions ( at end_of_data stage for nbrcpt )
-smtpd_end_of_data_restrictions = check_policy_service inet:127.0.0.1:9093
-#smtpd_end_of_data_restrictions = check_policy_service unix:private/go-policyd
+#smtpd_end_of_data_restrictions = check_policy_service inet:127.0.0.1:9093
+smtpd_end_of_data_restrictions = check_policy_service unix:private/go-policyd
 go-policyd_time_limit = 3600
 ```
 
