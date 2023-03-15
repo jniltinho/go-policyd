@@ -1,14 +1,10 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func init() {
@@ -34,31 +30,16 @@ func main() {
 	defaultQuota, _ = strconv.ParseInt(cfg["defaultquota"], 0, 64)
 
 	//listener := RunServer("tcp", cfg["bind"])
-	listener := UnixServer()
-	defer listener.Close()
+	// Create a new server with Unix socket and listen on /tmp/server.sock
+	unixServer := NewServer("unix", SOCKADDR)
+	if err := unixServer.RunServer(); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to start Unix server: %v\n", err)
+		os.Exit(1)
+	}
 
 	initSyslog(syslogtag)
 
 	xlog.Info(fmt.Sprintf("%s started.", Version))
 	writePidfile(pidfile)
-
-	connectionString := F("%s:%s@tcp(%s)/%s", cfg["dbuser"], cfg["dbpass"], cfg["dbhost"], cfg["dbname"])
-	db, err := sql.Open("mysql", connectionString)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	go dbClean(db)
-	defer db.Close()
-
-	for {
-		// Listen for an incoming connection.
-		conn, err := listener.Accept()
-		if err != nil {
-			log.Panic("Error accepting: " + err.Error())
-		}
-		xlog.Info("====> GO-POLICYD <=====")
-		go handleRequest(conn, db)
-	}
 
 }
